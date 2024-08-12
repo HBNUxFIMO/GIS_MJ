@@ -1,0 +1,237 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Intro to graphics | Sample | ArcGIS Maps SDK for JavaScript 4.30</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.30/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <script>
+      require(["esri/Map", "esri/views/MapView", "esri/Graphic"], (Map, MapView, Graphic) => {
+        const map = new Map({
+          basemap: "hybrid"
+        });
+
+        const view = new MapView({
+          center: [127.30084221078482, 36.35173239804881],
+          container: "viewDiv",
+          map: map,
+          zoom: 13
+        });
+
+        /*************************
+         * Create multiple point graphics
+         *************************/
+
+        // GeoJSON data
+        const geojsonData = {
+          "type": "FeatureCollection",
+          "features": [
+            {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "coordinates": [
+                    127.30074511002118,
+                    36.35083696445707
+                    ],
+                    "type": "Point"
+                }
+                },
+                {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "coordinates": [
+                    127.34539328022913,
+                    36.37111871080893
+                    ],
+                    "type": "Point"
+                }
+                },
+                {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "coordinates": [
+                    127.3645414722094,
+                    36.35837740907179
+                    ],
+                    "type": "Point"
+                }
+                },
+                {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "coordinates": [
+                    127.36499201562413,
+                    36.36083676570661
+                    ],
+                    "type": "Point"
+                }
+            }
+          ]
+        };
+
+        // Iterate through the features and create point graphics
+        geojsonData.features.forEach(feature => {
+          if (feature.geometry.type === "Point") {
+            const point = {
+              type: "point", // autocasts as new Point()
+              longitude: feature.geometry.coordinates[0],
+              latitude: feature.geometry.coordinates[1]
+            };
+
+            const markerSymbol = {
+              type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+              style: "triangle",  
+              color: [255, 255, 30],
+              outline: {
+                color: [255, 255, 30],
+                width: 4
+              }
+            };
+
+            const pointGraphic = new Graphic({
+              geometry: point,
+              symbol: markerSymbol
+            });
+
+            // Add each point graphic to the view
+            view.graphics.add(pointGraphic);
+          }
+        });
+
+        /****************************
+         * Create a polyline graphic
+         ****************************/
+
+        // First create a line geometry (this is the Keystone pipeline)
+        const polyline = {
+          type: "polyline", // autocasts as new Polyline()
+          paths: [
+          [
+            127.30074294462759,
+            36.35082864565868
+          ],
+          [
+            127.34542571913659,
+            36.37106481871608
+          ],
+          [
+            127.36454714870132,
+            36.358383726380794
+          ],
+          [
+            127.36500451843125,
+            36.36088514711204
+          ]
+        ]
+        };
+
+        // Create a symbol for drawing the line
+        const lineSymbol = {
+          type: "simple-line", // autocasts as SimpleLineSymbol()
+          color: [255, 0, 255],
+          width: 4
+        };
+
+        // Create an object for storing attributes related to the line
+        const lineAtt = {
+          Name: "Keystone Pipeline",
+          Owner: "TransCanada",
+          Length: "3,456 km"
+        };
+
+        // Create a new graphic and add the geometry, symbol, and attributes to it
+        const polylineGraphic = new Graphic({
+          geometry: polyline,
+          symbol: lineSymbol,
+          attributes: lineAtt,
+          popupTemplate: {
+            title: "{Name}",
+            content: [
+              {
+                type: "fields",
+                fieldInfos: [
+                  { fieldName: "Name" },
+                  { fieldName: "Owner" },
+                  { fieldName: "Length" }
+                ]
+              }
+            ]
+          }
+        });
+
+        /***************************
+         * Create a polygon graphic
+         ***************************/
+
+        // Create a polygon geometry
+        const polygon = {
+          type: "polygon", // autocasts as new Polygon()
+          rings: [
+          [
+            [
+              127.29679710563522,
+              36.35324321881774
+            ],
+            [
+              127.29679710563522,
+              36.34915608170148
+            ],
+            [
+              127.3014260313318,
+              36.34915608170148
+            ],
+            [
+              127.3014260313318,
+              36.35324321881774
+            ],
+            [
+              127.29679710563522,
+              36.35324321881774
+            ]
+          ]
+        ]
+        };
+
+        // Create a symbol for rendering the graphic
+        const fillSymbol = {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [230, 100, 230, 0.3], // internal color
+          outline: {
+            color: [230, 100, 230], 
+            width: 1 
+          }
+        };
+
+        // Add the geometry and symbol to a new graphic
+        const polygonGraphic = new Graphic({
+          geometry: polygon,
+          symbol: fillSymbol
+        });
+
+        // Add the graphics to the view's graphics layer
+        view.graphics.addMany([polylineGraphic, polygonGraphic]);
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
